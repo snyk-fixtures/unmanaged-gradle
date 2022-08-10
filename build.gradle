@@ -1,0 +1,23 @@
+def jarDir = layout.buildDirectory.dir('jars')
+
+subprojects {
+    apply plugin: 'java'
+
+    task cleanJars(type: Delete) {
+        delete jarDir
+    }
+    clean.dependsOn(cleanJars)
+
+    task copyJars(type: Copy) {
+        dependsOn cleanJars
+        from configurations.runtimeClasspath
+        into jarDir
+    }
+
+    task snykTest(type: Exec) {
+        dependsOn copyJars
+        workingDir jarDir
+        commandLine 'snyk', 'test', '--scan-all-unmanaged'
+    }
+
+}
